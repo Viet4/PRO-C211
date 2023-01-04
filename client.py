@@ -86,10 +86,10 @@ def skip(dir):
 
   if dir:
     playtime = mixer.music.get_pos() + playtime + 5000
-    if(playtime < 0): playtime = 0
   else:
     playtime = mixer.music.get_pos() + playtime - 5000
-  
+    
+  if(playtime < 0): playtime = 0
   mixer.music.play(start=playtime/1000)
   playButton.configure(text="I I")
 
