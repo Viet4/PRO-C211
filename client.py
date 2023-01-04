@@ -33,7 +33,7 @@ pause = False
 font = "Calibri"
 
 def play():
-  global song_selected
+  global song_selected, pause
   song_selected = listbox.get(ANCHOR)
 
   pygame
@@ -42,19 +42,16 @@ def play():
   mixer.music.play()
   if(song_selected != ""):
     infoLabel.configure(text="Now Playing: "+song_selected)
-    playButton.configure(text="I I", command=pause)
+    playButton.configure(text="I I", command=pauseANDresume)
+    pause = False
   else:
     infoLabel.configure(text="")
 
-def pause():
+def pauseANDresume():
   global playtime, pause
   pause = not pause
 
-  pygame
-  mixer.init()
-  mixer.music.load("shared_files/"+song_selected)
   mixer.music.pause()
-
   if pause:
     # resume
     playButton.configure(text="I I")
@@ -62,36 +59,35 @@ def pause():
   else:
     # pause
     playButton.configure(text="▶")
-    playtime = mixer.music.get_pos() + playtime
+    playtime += mixer.music.get_pos()
 
 def stop():
-  global playtime
+  global playtime, song_selected
   playtime = 0
 
-  pygame
-  mixer.init()
-  mixer.music.load("shared_files/"+song_selected)
   mixer.music.pause()
-  print(mixer.music.get_pos())
   infoLabel.configure(text="")
   playButton.configure(text="▶", command=play)
+
+  song_selected = None
 
 def skip(dir):
   global playtime
 
-  pygame
-  mixer.init()
-  mixer.music.load("shared_files/"+song_selected)
-  mixer.music.pause()
+  try:
+    mixer.music.load("shared_files/"+song_selected)
+    if dir:
+      # fast-forward
+      playtime += mixer.music.get_pos() + 5000
+    else:
+      # rewind
+      playtime += mixer.music.get_pos() - 5000
 
-  if dir:
-    playtime = mixer.music.get_pos() + playtime + 5000
-  else:
-    playtime = mixer.music.get_pos() + playtime - 5000
-    
-  if(playtime < 0): playtime = 0
-  mixer.music.play(start=playtime/1000)
-  playButton.configure(text="I I")
+    if(playtime < 0): playtime = 0
+    mixer.music.play(start=playtime/1000)
+    playButton.configure(text="I I")
+
+  except: pass
 
 def musicWindow():
   global listbox, infoLabel, playButton
@@ -111,7 +107,7 @@ def musicWindow():
   for file in os.listdir("shared_files"):
     fileName = os.fsdecode(file)
     listbox.insert(song_counter, fileName)
-    song_counter = song_counter + 1
+    song_counter += 1
 
   scrollbar1 = Scrollbar(listbox)
   scrollbar1.place(relheight=1, relx=1)
