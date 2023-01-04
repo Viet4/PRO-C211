@@ -43,7 +43,6 @@ def play():
   if(song_selected != ""):
     infoLabel.configure(text="Now Playing: "+song_selected)
     playButton.configure(text="I I", command=pauseANDresume)
-    pause = False
   else:
     infoLabel.configure(text="")
 
